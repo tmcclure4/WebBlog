@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+<cron>
+<url>/cron/subscribeemailjob</url>
+<description>Send email to all subscribers every Friday at 17:00</description>
+<schedule>every monday 21:19</schedule>
+</cron>
+</cronentries>
