@@ -4,14 +4,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -33,7 +39,10 @@ import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import java.awt.Desktop;
 import java.net.URI;
 
@@ -94,6 +103,20 @@ public class SubscribeEmailServlet extends HttpServlet{
 			
 		}
 		Collections.reverse(newArray);
+		ArrayList<String> finalarr = new ArrayList<String>();
+		for(Greeting t : newArray){
+			finalarr.add(t.getContent());
+			finalarr.add(t.getBlog());
+		}
+		
+		StringBuilder listString = new StringBuilder();
+
+		for (String s : finalarr){
+		     listString.append(s+" ");
+		}
+		String ex = listString.toString();
+		
+		
 		Date yesterday = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L);
 		List<Greeting> q = ofy().load().type(Greeting.class).filter("date >", yesterday).list();
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,12 +151,20 @@ public class SubscribeEmailServlet extends HttpServlet{
 	         message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 
 	         // Set Subject: header field
-	         message.setSubject("461L BLOG!");
+	        // message.setSubject("461L BLOG!");
+	         
+	         
+	         
+	         
 
 	         // Now set the actual message
+	         message.setSubject("Testing javamail with attachment");
+
+	       message.setText(ex);
 	         
-	        	// message.setText(g.getUser() + " posted about " + g.content);
-	         message.setText("You are subscribed to the 461L blog.");
+	         
+	         
+	         
 
 	         // Send message
 	         Transport.send(message);
