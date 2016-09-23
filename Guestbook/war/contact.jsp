@@ -37,22 +37,11 @@
     <div class="navlist">
       <ul>
         <li><a href="allposts.jsp">Older Posts</a></li>
-		<li><a href="contact.jsp">Contact</a></li>
       </ul>
     </div>
   </div>
   
-  
- <h2> Title</h2>
-<form action="/ofysign" method="post">
- <div><textarea name="content" rows="1" cols="60"></textarea>
-  <h2> Blog</h2>
-   <textarea name ="blog" rows="10" cols="60"></textarea> </div>
-    
- <div id = "content"><input type="submit" value="Post Greeting" /></div>
- <input type="hidden" name="guestbookName" value="${fn:escapeXml(guestbookName)}"/>
- </form> 
-
+<a>Sri or Travis</a>
  
   <div id="container-foot">
     <div id="footer">

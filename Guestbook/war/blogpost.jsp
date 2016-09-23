@@ -13,6 +13,7 @@
 <%@ page import="guestbook.Greeting" %>
 
 <%@ page import="java.util.Collections" %>
+<%@ page import ="java.util.ArrayList" %>
 
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
@@ -36,8 +37,8 @@
     <h2>Posts</h2>
     <div class="navlist">
       <ul>
-        <li><a href="#">Older Posts</a></li>
-        <li><a href="#">Random</a></li>
+        <li><a href="allposts.jsp">Older Posts</a></li>
+        
       </ul>
     </div>
  
@@ -64,7 +65,7 @@
       pageContext.setAttribute("user", user);
 
 %>
-    <h2>Hello, ${fn:escapeXml(user.nickname)}!</h2>
+    <h2>Hello, ${fn:escapeXml(user.nickname)}!s</h2>
     <h2>( You can <a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">sign out</a>.)</h2>
     <%
 
@@ -90,11 +91,30 @@ to include your name with greetings you post.</p>
 
 	List<Greeting> greetings = ObjectifyService.ofy().load().type(Greeting.class).list(); 
 
-	Collections.reverse(greetings);
-			
-		
+	//Collections.reverse(greetings);
+	
+	List<Greeting> newArray=new ArrayList<Greeting>();
 
-	if (greetings.isEmpty()) {
+	for(Greeting sourceDay: greetings){
+		if(newArray.isEmpty()){
+			newArray.add(sourceDay);
+		}
+		else{
+			for(int counter=0;counter<newArray.size();counter++){
+    			if(sourceDay.compareTo(newArray.get(counter)) == -1){
+    				newArray.add(counter, sourceDay);
+    				break;
+    			}
+    			else if(counter+1==newArray.size()){//its at the back of the array
+    				newArray.add(counter+=1,sourceDay);
+    			}
+    		}
+		}
+		
+	}
+	Collections.reverse(newArray);
+	
+	if (newArray.isEmpty()) {
 
         %>
 
@@ -108,10 +128,12 @@ to include your name with greetings you post.</p>
 
         <p>Messages in Guestbook '${fn:escapeXml(guestbookName)}'.</p>
 
-        <%
-        for (Greeting greeting : greetings) {
-			int count = 0;
-	       	if(count == 3) break;
+        <%			 
+        int count = newArray.size();
+        Greeting greeting;
+        for (int i = 0; i<4; i++) {
+        	if(--count<i)break;
+        	greeting = newArray.get(i);
             pageContext.setAttribute("greeting_content",
 
                                      greeting.getContent());
@@ -165,14 +187,20 @@ to include your name with greetings you post.</p>
 </script>
 
     
-    <p class="post">  <a href="#" class="comments">Comments</a> </p>
-          <form action="/cron/subscribeemailjob" >
-      <input type="submit" value="Subscribe"/>
+    <p class="post">   <a href="allposts.jsp" class="allposts">All Older Posts</a></p>
+   <%if(user != null){ %>
+ <form action="/cron" method="post">
+      <button type="submit" name ="button" value="Subscribe">Subscribe</button>
  </form> 
+ <form action="/Unsubscribe" method="post">
+      <button type="submit" name ="button" value="Unsubscribe">Unsubscribe</button>
+  </form>
+ <%} %>
+ 
   </div>
   <div id="container-foot">
     <div id="footer">
-      <p><a href="#">homepage</a> | <a href="#">contact</a></p>
+      <p><a href="blogpost.jsp">homepage</a> | <a href="contact.jsp">contact</a></p>
 		
     </div>
   </div>

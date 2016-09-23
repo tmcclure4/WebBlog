@@ -3,6 +3,11 @@ package guestbook;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -20,6 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.googlecode.objectify.ObjectifyService;
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -49,18 +57,50 @@ public class SubscribeEmailServlet extends HttpServlet{
 	throws ServletException, IOException {
 	doGet(req, resp);
 	}*/
-	
+	static {
+
+        ObjectifyService.register(Greeting.class);
+
+    }
+	static {
+
+        ObjectifyService.register(EmailSingle.class);
+
+    }
 	public void doGet(HttpServletRequest request,
             HttpServletResponse response)
     throws ServletException, IOException
 	{
-    	Greeting greeting;
-
-        UserService userService = UserServiceFactory.getUserService();
-
-        User user = userService.getCurrentUser();
+		List<EmailSingle> emails = ObjectifyService.ofy().load().type(EmailSingle.class).list(); 
+		
+		//////////////////////////////////////////////////////////////////////////////////////////	for email update
+		List<Greeting> greetings = ObjectifyService.ofy().load().type(Greeting.class).list();
+		List<Greeting> newArray = new ArrayList<Greeting>();
+		for(Greeting sourceDay: greetings){
+			if(newArray.isEmpty()){
+				newArray.add(sourceDay);
+			}
+			else{
+				for(int counter=0;counter<newArray.size();counter++){
+	    			if(sourceDay.compareTo(newArray.get(counter)) == -1){
+	    				newArray.add(counter, sourceDay);
+	    				break;
+	    			}
+	    			else if(counter+1==newArray.size()){//its at the back of the array
+	    				newArray.add(counter+=1,sourceDay);
+	    			}
+	    		}
+			}
+			
+		}
+		Collections.reverse(newArray);
+		Date yesterday = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L);
+		List<Greeting> q = ofy().load().type(Greeting.class).filter("date >", yesterday).list();
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		for(EmailSingle emai : emails){
 		// Recipient's email ID needs to be mentioned.
-	      String to = user.getNickname();
+	      String to = emai.getEmail();
 
 	      // Sender's email ID needs to be mentioned
 	      String from = "zygchess@gmail.com";//tmcclure@travisnewguestbook.appspotmail.com
@@ -88,10 +128,12 @@ public class SubscribeEmailServlet extends HttpServlet{
 	         message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 
 	         // Set Subject: header field
-	         message.setSubject("This is the Subject Line!");
+	         message.setSubject("461L BLOG!");
 
 	         // Now set the actual message
-	         message.setText("This is actual message");
+	         
+	        	// message.setText(g.getUser() + " posted about " + g.content);
+	         message.setText("You are subscribed to the 461L blog.");
 
 	         // Send message
 	         Transport.send(message);
@@ -99,6 +141,7 @@ public class SubscribeEmailServlet extends HttpServlet{
 	      }catch (MessagingException mex) {
 	         mex.printStackTrace();
 	      }
+		}
 		/*Properties props = new Properties();
 	    Session session = Session.getDefaultInstance(props, null);
 
@@ -117,72 +160,11 @@ public class SubscribeEmailServlet extends HttpServlet{
 	      // ...
 	    }
 	    // [END simple_example]*/
+	        //response.sendRedirect("/blogpost.jsp");
+
 	  }
 		 
 	
 	
 	
 }
-
-
-
-
-/*	public void doGet(HttpServletRequest request,
-HttpServletResponse response)
-throws ServletException, IOException
-{
-System.out.println("TESTING PLEASE WORK");
-// Recipient's email ID needs to be mentioned.
-String to = "tmcclure4@yahoo.com";
-
-// Sender's email ID needs to be mentioned
-String from = "web@gmail.com";
-
-// Assuming you are sending email from localhost
-String host = "localhost";
-
-// Get system properties
-Properties properties = System.getProperties();
-
-// Setup mail server
-properties.setProperty("mail.smtp.host", host);
-
-// Get the default Session object.
-Session session = Session.getDefaultInstance(properties);
-
-// Set response content type
-response.setContentType("text/html");
-PrintWriter out = response.getWriter();
-
-try{
- // Create a default MimeMessage object.
- MimeMessage message = new MimeMessage(session);
- // Set From: header field of the header.
- message.setFrom(new InternetAddress(from));
- // Set To: header field of the header.
- message.addRecipient(Message.RecipientType.TO,
-                          new InternetAddress(to));
- // Set Subject: header field
- message.setSubject("This is the Subject Line!");
- // Now set the actual message
- message.setText("This is actual message");
- // Send message
- Transport.send(message);
- String title = "Send Email";
- String res = "Sent message successfully....";
- String docType =
- "<!doctype html public \"-//w3c//dtd html 4.0 " +
- "transitional//en\">\n";
- out.println(docType +
- "<html>\n" +
- "<head><title>" + title + "</title></head>\n" +
- "<body bgcolor=\"#f0f0f0\">\n" +
- "<h1 align=\"center\">" + title + "</h1>\n" +
- "<p align=\"center\">" + res + "</p>\n" +
- "</body></html>");
-}catch (MessagingException mex) {
-mex.printStackTrace();
-}
-}
-
-*/
